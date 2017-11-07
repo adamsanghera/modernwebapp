@@ -3,159 +3,85 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"os"
-	"strconv"
-	"time"
 
-	"github.com/go-redis/redis"
+	"./redisBus"
 )
 
-var redisAddress = os.Getenv("REDIS_ADDRESS")
-var redisPort = os.Getenv("REDIS_PORT")
-
 var connected = false
-var client = &redis.Client{}
 
 func getCountHandler(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	x := ""
 	if connected {
-		val, err := getCounterValue()
+		msg, err := redisBus.GetCounterValue()
 		if err != nil {
+			panic(err)
 		}
-		x = strconv.Itoa(val)
+		w.Write([]byte(msg))
 	} else {
-		x = "No connection to database"
+		w.Write([]byte("No connnection to Database"))
 	}
-	w.Write([]byte(x))
 }
 
 func incCountHandler(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	x := ""
 	if connected {
-		_, err := client.Incr("counter").Result()
+		msg, err := redisBus.IncrementCounter()
 		if err != nil {
 			panic(err)
 		}
-		x = "Incremented!"
+		w.Write([]byte(msg))
 	} else {
-		x = "No connection to database"
+		w.Write([]byte("No connection to Database"))
 	}
-
-	w.Write([]byte(x))
 }
 
 func decCountHandler(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	x := ""
+
 	if connected {
-		_, err := client.Decr("counter").Result()
+		msg, err := redisBus.DecrementCounter()
 		if err != nil {
 			panic(err)
 		}
-		x = "Decremented!"
+		w.Write([]byte(msg))
 	} else {
-		x = "No connection to database"
+		w.Write([]byte("No connection to Database"))
 	}
-	w.Write([]byte(x))
 }
 
 func flipCountHandler(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	x := ""
 	if connected {
-		val, err := getCounterValue()
+		msg, err := redisBus.FlipCounter()
 		if err != nil {
 			panic(err)
 		}
-		_, err = client.DecrBy("counter", int64(val*2)).Result()
-		if err != nil {
-			panic(err)
-		}
-		x = "Flipped!"
+		w.Write([]byte(msg))
 	} else {
-		x = "No connection to database"
+		w.Write([]byte("No connection to Database"))
 	}
-
-	w.Write([]byte(x))
 }
 
 func resetCountHandler(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	x := ""
 	if connected {
-		_, err := client.Set("counter", 0, 0).Result()
+		msg, err := redisBus.ResetCounter()
 		if err != nil {
 			panic(err)
 		}
-		x = "Reset!"
+		w.Write([]byte(msg))
 	} else {
-		x = "No connection to database"
+		w.Write([]byte("No connection to Database"))
 	}
-
-	w.Write([]byte(x))
-}
-
-func connectToRedis(attemptLimt int) (*redis.Client, error) {
-	fmt.Println("Connecting to Redis...")
-
-	client := redis.NewClient(&redis.Options{
-		Addr:     redisAddress + ":" + redisPort,
-		Password: "", // no password set
-		DB:       0,  // use default DB
-	})
-
-	fmt.Println("Attempting connection number 1 ...")
-	_, err := client.Ping().Result()
-
-	for numAttempts := 1; numAttempts < attemptLimt && err != nil; numAttempts++ {
-		numAttempts++
-		fmt.Println("Waiting for 2.5 seconds")
-		time.Sleep(2500 * time.Millisecond)
-		fmt.Println("Attempting connection number", strconv.Itoa(numAttempts), "...")
-		_, err = client.Ping().Result()
-		fmt.Println("Error: ", err)
-	}
-
-	if err != nil {
-		fmt.Println("Failed to connect to Redis at ", redisAddress, ":", redisPort, "after", attemptLimt, "attempts.")
-		connected = false
-		return nil, err
-	}
-	fmt.Println("Successfully connected to Redis at ", redisAddress, ":", redisPort, "!")
-	connected = true
-	return client, nil
-}
-
-func getCounterValue() (int, error) {
-	val, err := client.Get("counter").Result()
-	if err != nil {
-		return 0, err
-	}
-	fmt.Println("key", val)
-	num, err := strconv.Atoi(val)
-	if err != nil {
-		return 0, err
-	}
-	return num, nil
-}
-
-func createFirstCounter() error {
-	err := client.Set("counter", 0, 0).Err()
-	if err != nil {
-		panic(err)
-	}
-	return err
 }
 
 func main() {
@@ -165,23 +91,26 @@ func main() {
 	http.HandleFunc("/flipCounter", flipCountHandler)
 	http.HandleFunc("/resetCounter", resetCountHandler)
 
-	var err error
-
-	client, err = connectToRedis(5)
+	err := redisBus.ConnectToServer(5)
 	if err != nil {
 		panic(err)
 	}
 
-	_, err = getCounterValue()
+	_, err = redisBus.GetCounterValue()
 
 	if err != nil {
 		if err.Error() == "redis: nil" {
-			err = createFirstCounter()
+			err = redisBus.CreateFirstCounter()
 			if err != nil {
-				fmt.Println(err)
-				os.Exit(400)
+				panic(err)
+			} else {
+				connected = true
 			}
+		} else {
+			panic(err)
 		}
+	} else {
+		connected = true
 	}
 
 	fmt.Println("Listening...")
