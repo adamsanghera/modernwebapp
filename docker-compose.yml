@@ -1,0 +1,17 @@
+version: '3'
+services:
+  nginx-site:
+    build: ./website/
+    ports:
+      - '80:80'
+    networks:
+      - counter
+  server:
+    build: ./goServeMe/
+    ports:
+      - '3000:3000'
+    networks:
+      - counter
+
+networks:
+  counter:
