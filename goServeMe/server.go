@@ -4,92 +4,16 @@ import (
 	"fmt"
 	"net/http"
 
+	"./handlers"
 	"./redisBus"
 )
 
-var connected = false
-
-func getCountHandler(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-
-	if connected {
-		msg, err := redisBus.GetCounterValue()
-		if err != nil {
-			panic(err)
-		}
-		w.Write([]byte(msg))
-	} else {
-		w.Write([]byte("No connnection to Database"))
-	}
-}
-
-func incCountHandler(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-
-	if connected {
-		msg, err := redisBus.IncrementCounter()
-		if err != nil {
-			panic(err)
-		}
-		w.Write([]byte(msg))
-	} else {
-		w.Write([]byte("No connection to Database"))
-	}
-}
-
-func decCountHandler(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-
-	if connected {
-		msg, err := redisBus.DecrementCounter()
-		if err != nil {
-			panic(err)
-		}
-		w.Write([]byte(msg))
-	} else {
-		w.Write([]byte("No connection to Database"))
-	}
-}
-
-func flipCountHandler(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-
-	if connected {
-		msg, err := redisBus.FlipCounter()
-		if err != nil {
-			panic(err)
-		}
-		w.Write([]byte(msg))
-	} else {
-		w.Write([]byte("No connection to Database"))
-	}
-}
-
-func resetCountHandler(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-
-	if connected {
-		msg, err := redisBus.ResetCounter()
-		if err != nil {
-			panic(err)
-		}
-		w.Write([]byte(msg))
-	} else {
-		w.Write([]byte("No connection to Database"))
-	}
-}
-
 func main() {
-	http.HandleFunc("/getCounter", getCountHandler)
-	http.HandleFunc("/incCounter", incCountHandler)
-	http.HandleFunc("/decCounter", decCountHandler)
-	http.HandleFunc("/flipCounter", flipCountHandler)
-	http.HandleFunc("/resetCounter", resetCountHandler)
+	http.HandleFunc("/getCounter", handlers.GetCountHandler)
+	http.HandleFunc("/incCounter", handlers.IncCountHandler)
+	http.HandleFunc("/decCounter", handlers.DecCountHandler)
+	http.HandleFunc("/flipCounter", handlers.FlipCountHandler)
+	http.HandleFunc("/resetCounter", handlers.ResetCountHandler)
 
 	err := redisBus.ConnectToServer(5)
 	if err != nil {
@@ -98,13 +22,13 @@ func main() {
 
 	_, err = redisBus.GetCounterValue()
 
-	if err.Error() == "redis: nil" {
+	if err != nil && err.Error() == "redis: nil" {
 		err = redisBus.CreateFirstCounter()
-		connected = true
+		handlers.Connected = true
 	} else if err != nil {
 		panic(err)
 	} else {
-		connected = true
+		handlers.Connected = true
 	}
 
 	fmt.Println("Listening...")
