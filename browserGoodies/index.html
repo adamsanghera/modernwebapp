@@ -1,0 +1,94 @@
+<html>
+  <head>
+    <title>Test App</title>
+    <link rel="stylesheet" type="text/css" href="index.css">
+  </head>
+  <header>
+
+  </header>
+  <body>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <h1>
+      Welcome to my web app
+    </h1>
+    <div class='shadow-box'>
+      <div class='words-container'>
+        <p id='description-intro'>
+          This web app exposes a local, <em>in-browser counter</em>, to get comfortable with controls. <br> <br>
+          This also exposes a <em>distributed counter</em>, which is accessible to anyone connected to the <em>counter network</em>. <br> <br>
+          The local counter is here to help you learn the distributed counter's controls. <br> <br>
+          This web app has three goals.
+        </p>
+        <li i='desc-1'>
+          Displays a dynamic counter.
+        </li>
+        <li i='desc-2'>
+          Allows you to interact with the dynamic counter.
+        </li>
+        <li i='desc-3'>
+          Gives you insight into how the counter is maintained.
+        </li>
+      </div>
+    </div>
+    <div class='regular-box'>
+      <div class ='words-container'>
+        Local Counter Value: 
+        <p id='local-counter-value'>
+          No value has been recorded yet.
+        </p>
+      </div>
+      <div class='control-box' id='local'>
+        <div class ='words-container'>
+            Controls: 
+            <button id='local-inc'>
+              increment
+            </button>
+            <button id='local-dec'>
+              decrement
+            </button>
+            <button id='local-flip'>
+              flip
+            </button>
+            <button id='local-reset'>
+              reset
+            </button>
+          </div>
+      </div>
+    </div>
+    <div class='regular-box'>
+      <div class ='words-container'>
+        Value: 
+        <p id='net-counter-value'>
+          No value has been recorded yet.
+        </p>
+        <br>
+        Net Status:
+        <p id='net-connectivity'>
+          No attempts have been made to connect.
+        </p>
+      </div>
+      <div class='control-box' id='net'>
+        <div class ='words-container'>
+            Controls: 
+            <button id='net-inc'>
+              increment
+            </button>
+            <button id='net-dec'>
+              decrement
+            </button>
+            <button id='net-flip'>
+              flip
+            </button>
+            <button id='net-reset'>
+              reset
+            </button>
+          </div>
+      </div>
+    </div>
+  </body>
+  <footer>
+
+  </footer>
+  <script src="index.js">
+  </script>
+</html>

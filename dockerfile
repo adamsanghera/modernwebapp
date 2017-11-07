@@ -1,3 +1,3 @@
 FROM scratch
-ADD main /
+ADD ./build/main /
 CMD ["/main"]
