@@ -98,17 +98,11 @@ func main() {
 
 	_, err = redisBus.GetCounterValue()
 
-	if err != nil {
-		if err.Error() == "redis: nil" {
-			err = redisBus.CreateFirstCounter()
-			if err != nil {
-				panic(err)
-			} else {
-				connected = true
-			}
-		} else {
-			panic(err)
-		}
+	if err.Error() == "redis: nil" {
+		err = redisBus.CreateFirstCounter()
+		connected = true
+	} else if err != nil {
+		panic(err)
 	} else {
 		connected = true
 	}
