@@ -73,20 +73,34 @@ function sendNetSignal(signal) {
   });
 }
 
+let log = document.getElementById('net-log')
+
+function outputLog(msg) {
+  const node = document.createElement("p");
+  x = new Date();
+  node.textContent = x.toLocaleTimeString() + ' - ' + msg;
+  log.insertBefore(node, log.firstChild);
+  log.scrollTo(0,0);
+}
+
 document.getElementById('net-inc').addEventListener("click", () => {
   sendNetSignal("incCounter")
+  outputLog('Incremented!')
 })
 
 document.getElementById('net-dec').addEventListener("click", () => {
   sendNetSignal("decCounter")
+  outputLog('Decremented!')
 })
 
 document.getElementById('net-flip').addEventListener("click", () => {
   sendNetSignal("flipCounter")
+  outputLog('Flipped!')
 })
 
 document.getElementById('net-reset').addEventListener("click", () => {
   sendNetSignal("resetCounter")
+  outputLog('Reset!')
 })
 
 window.setInterval(() => {

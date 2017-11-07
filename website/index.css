@@ -1,0 +1,85 @@
+body {
+  color: black;
+  font-family: Garamond;
+}
+
+.shadow-box {
+  margin-left: 5ex;
+  margin-top: 5ex;
+  margin-bottom: 5ex;
+  margin-right: 5ex;
+  border: black 1px solid;
+  box-shadow: 5px 5px 10px;
+}
+
+.regular-box {
+  margin-left: 5ex;
+  margin-top: 5ex;
+  margin-bottom: 5ex;
+  margin-right: 5ex;
+  border: black 1px solid;
+}
+
+#local {
+  margin-left: 1ex;
+  margin-top: 1ex;
+  margin-bottom: 1ex;
+  margin-right: 1ex;
+  border: black 1px dashed;
+}
+
+#net {
+  margin-left: 1ex;
+  margin-top: 1ex;
+  margin-bottom: 1ex;
+  margin-right: 1ex;
+  border: blueviolet 1px dashed;
+}
+
+.words-container {
+  margin-left: 2.5ex;
+  margin-top:  2.5ex;
+  margin-right: 2.5ex;
+  margin-bottom: 2.5ex;
+}
+
+#net-container.regular-box {
+  overflow: hidden;
+}
+
+#net-ticker.words-container {
+  display: inline-block;  
+  vertical-align: top;
+  width: 40%;
+  height: auto;
+}
+
+#net-log.words-container {
+  display: inline-block; 
+  vertical-align: top;
+  width: 48.5%;
+  height: 150px;
+  border: 2px solid paleturquoise;
+}
+
+#net.control-box {
+  display: inline-block;
+  vertical-align: top;
+}
+
+#net-log {
+  -webkit-margin-before: 0.5em;
+  -webkit-margin-after: 0.5em;
+  -webkit-margin-start: 0.5em;
+  -webkit-margin-end: 0.5em;
+  font-family: consolas;
+  font-size: 10;
+  overflow: scroll;
+}
+
+p {
+  -webkit-margin-before: 0.5em;
+  -webkit-margin-after: 0.5em;
+  -webkit-margin-start: 0.5em;
+  -webkit-margin-end: 0.5em;
+}
