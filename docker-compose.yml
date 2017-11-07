@@ -8,10 +8,21 @@ services:
       - counter
   server:
     build: ./goServeMe/
-    ports:
-      - '3000:3000'
+    depends_on:
+      - redis
+    environment:
+      - REDIS_ADDRESS=redis
+      - REDIS_PORT=6379
     networks:
       - counter
+      - counterDB
+    ports:
+      - '3000:3000'
+  redis:
+    image: redis
+    networks:
+      - counterDB
 
 networks:
   counter:
+  counterDB:
