@@ -15,10 +15,7 @@ func main() {
 	http.HandleFunc("/flipCounter", handlers.FlipCountHandler)
 	http.HandleFunc("/resetCounter", handlers.ResetCountHandler)
 
-	err := redisBus.ConnectToServer(5)
-	if err != nil {
-		panic(err)
-	}
+	err := redisBus.IsReady
 
 	_, err = redisBus.GetCounterValue()
 

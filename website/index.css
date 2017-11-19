@@ -1,14 +1,9 @@
-body {
-  color: black;
-  font-family: Garamond;
-}
-
 .shadow-box {
   margin-left: 5ex;
   margin-top: 5ex;
   margin-bottom: 5ex;
   margin-right: 5ex;
-  border: black 1px solid;
+  border: #32325d 1px solid;
   box-shadow: 5px 5px 10px;
 }
 
@@ -17,7 +12,7 @@ body {
   margin-top: 5ex;
   margin-bottom: 5ex;
   margin-right: 5ex;
-  border: black 1px solid;
+  border: #32325d 1px solid;
 }
 
 #local {
@@ -25,7 +20,7 @@ body {
   margin-top: 1ex;
   margin-bottom: 1ex;
   margin-right: 1ex;
-  border: black 1px dashed;
+  border: #32325d 1px dashed;
 }
 
 #net {
@@ -41,6 +36,16 @@ body {
   margin-top:  2.5ex;
   margin-right: 2.5ex;
   margin-bottom: 2.5ex;
+}
+
+body {
+  background: #f6f9fc;
+  color: #32325d;
+  font-family: Garamond;
+}
+
+h1 {
+  color: black;
 }
 
 #net-container.regular-box {
