@@ -6,9 +6,6 @@ import (
 	"github.com/go-redis/redis"
 )
 
-var redisAddress = os.Getenv("REDIS_ADDRESS")
-var redisPort = os.Getenv("REDIS_PORT")
-var client = &redis.Client{}
-
-//ReadyFlag ... Used to indicate when Redis is ready.
-var IsReady error
+var RedisAddress = os.Getenv("REDIS_ADDRESS")
+var RedisPort = os.Getenv("REDIS_PORT")
+var Client = &redis.Client{}

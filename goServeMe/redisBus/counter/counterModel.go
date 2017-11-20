@@ -1,14 +1,16 @@
-package redisBus
+package counter
 
 import (
 	"fmt"
 	"strconv"
+
+	bus ".."
 )
 
 //IncrementCounter ...
 // Uses Redis' built-in incr function to increment our counter
 func IncrementCounter() (string, error) {
-	_, err := client.Incr("counter").Result()
+	_, err := bus.Client.Incr("counter").Result()
 	if err != nil {
 		return "", nil
 	}
@@ -16,9 +18,9 @@ func IncrementCounter() (string, error) {
 }
 
 //GetCounterValue ...
-// Returs the value of the counter, and an error.
+// Returns the value of the counter, and an error.
 func GetCounterValue() (string, error) {
-	val, err := client.Get("counter").Result()
+	val, err := bus.Client.Get("counter").Result()
 	if err != nil {
 		return "", err
 	}
@@ -26,16 +28,20 @@ func GetCounterValue() (string, error) {
 	return val, nil
 }
 
+//DecrementCounter ...
+// Use Redis' built-in decr function to decrement our counter
 func DecrementCounter() (string, error) {
-	_, err := client.Decr("counter").Result()
+	_, err := bus.Client.Decr("counter").Result()
 	if err != nil {
 		return "", nil
 	}
 	return "Incremented!", nil
 }
 
+//FlipCounter ...
+// Decrement by twice the counter value
 func FlipCounter() (string, error) {
-	val, err := client.Get("counter").Result()
+	val, err := bus.Client.Get("counter").Result()
 	if err != nil {
 		return "", err
 	}
@@ -43,15 +49,17 @@ func FlipCounter() (string, error) {
 	if err != nil {
 		panic(err)
 	}
-	_, err = client.DecrBy("counter", int64(i*2)).Result()
+	_, err = bus.Client.DecrBy("counter", int64(i*2)).Result()
 	if err != nil {
 		return "", err
 	}
 	return "Flipped!", nil
 }
 
+//ResetCounter ...
+// Sets the counter's value to 0
 func ResetCounter() (string, error) {
-	_, err := client.Set("counter", 0, 0).Result()
+	_, err := bus.Client.Set("counter", 0, 0).Result()
 	if err != nil {
 		return "", err
 	}
