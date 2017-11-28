@@ -15,8 +15,6 @@ func main() {
 	http.HandleFunc("/flipCounter", handlers.FlipCountHandler)
 	http.HandleFunc("/resetCounter", handlers.ResetCountHandler)
 
-	err := redisBus.IsReady
-
 	_, err = redisBus.GetCounterValue()
 
 	if err != nil && err.Error() == "redis: nil" {

@@ -6,6 +6,9 @@ import (
 	"github.com/go-redis/redis"
 )
 
-var RedisAddress = os.Getenv("REDIS_ADDRESS")
-var RedisPort = os.Getenv("REDIS_PORT")
+var redisAddress = os.Getenv("REDIS_ADDRESS")
+var redisPort = os.Getenv("REDIS_PORT")
+
+//Client ...
+// Interface for interacting with redis
 var Client = &redis.Client{}
