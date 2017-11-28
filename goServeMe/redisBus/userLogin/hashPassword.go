@@ -1,18 +1,21 @@
-package userLogin
+package hash
 
 import (
 	"crypto/rand"
+	"encoding/hex"
 	"io"
 
 	"golang.org/x/crypto/scrypt"
 )
 
 const (
-	pwSaltBytes = 32
-	pwHashBytes = 64
+	pwSaltBytes = 2
+	pwHashBytes = 2
 )
 
-func hashPasswordWithoutSalt(pass string) string {
+//HashPasswordWithoutSalt ...
+// returns ENCODED salt and ENCODED hash
+func HashPasswordWithoutSalt(pass string) (string, string) {
 	// Make some random salt
 	salt := make([]byte, pwSaltBytes)
 	_, err := io.ReadFull(rand.Reader, salt)
@@ -20,16 +23,22 @@ func hashPasswordWithoutSalt(pass string) string {
 		panic(err)
 	}
 
-	return hashPasswordWithSalt(pass, salt)
+	encodedSalt := hex.EncodeToString(salt)
+
+	return string(encodedSalt), HashPasswordWithSalt(pass, string(salt))
 }
 
-func hashPasswordWithSalt(pass string, salt string) string {
+//HashPasswordWithSalt ...
+// returns ENCODED hash
+func HashPasswordWithSalt(pass string, salt string) string {
 	// Make the scrypt hash
-	hash, err := scrypt.Key([]byte(pass), salt, 1<<14, 8, 1, pwHashBytes)
+	hash, err := scrypt.Key([]byte(pass), []byte(salt), 1<<14, 8, 1, pwHashBytes)
 	if err != nil {
 		panic(err)
 	}
 
-	// Return the hash!
-	return string(hash)
+	encodedHash := hex.EncodeToString(hash)
+
+	// Return the unhex'd hash!
+	return string(encodedHash)
 }
