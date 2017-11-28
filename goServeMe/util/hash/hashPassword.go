@@ -58,12 +58,18 @@ func WithNewSalt(pass string) (string, string) {
 }
 
 //WithOldSalt ...
-// expects password, ENCODED salt
+// expects string, ENCODED salt
 // returns ENCODED hash
-func WithOldSalt(pass string, encodedSalt string) string {
+func WithOldSalt(str string, encodedSalt string) string {
 	salt := decode(encodedSalt)
 
-	hash := run(pass, salt)
+	hash := run(str, salt)
 
 	return hex.EncodeToString(hash)
+}
+
+//ValidateChallenge ...
+//  expects a challenge, encoded salt, encoded hash.
+func isValidChallenge(challenge string, encodedSalt string, encodedHash string) bool {
+	return WithOldSalt(challenge, encodedSalt) == encodedHash
 }
