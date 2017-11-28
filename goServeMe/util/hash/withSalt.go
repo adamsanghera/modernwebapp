@@ -73,3 +73,10 @@ func WithOldSalt(pass string, encodedSalt string) string {
 func IsValidChallenge(challenge string, encodedSalt string, encodedHash string) bool {
 	return WithOldSalt(challenge, encodedSalt) == encodedHash
 }
+
+//SplitContent ...
+// returns a split of the string, based on hash sizes.
+// Assumes that content is hash+salt, not the other way around.
+func SplitContent(combinedHash string) (string, string) {
+	return combinedHash[:pwHashBytes*2], combinedHash[pwHashBytes*2:]
+}

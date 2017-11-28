@@ -11,8 +11,6 @@ import (
 type regInfo struct {
 	Username string `json:"Username"`
 	Password string `json:"Password"`
-	Fname    string `json:"Fname"`
-	Lname    string `json:"Lname"`
 }
 
 type response struct {
