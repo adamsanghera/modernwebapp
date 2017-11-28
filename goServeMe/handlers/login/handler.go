@@ -21,19 +21,18 @@ type requestForm struct {
 //  INCOMPLETE!!!
 func Login(w http.ResponseWriter, req *http.Request) {
 	// Setup the response
-	resp, writer := response.SetupResponse()
+	resp, writer := response.SetupResponse(w)
 	defer writer.Encode(resp)
-	response.ConnectionCheck()
 
 	// Parse the request, make sure it's A-OK
 	var form requestForm
-	decoder := json.NewDecoder(r.Body)
+	decoder := json.NewDecoder(req.Body)
 	err := decoder.Decode(&form)
-	response.UpdateResponse(&resp, "", 0, err)
+	response.UpdateResponse(resp, "", 0, err)
 
 	// Retrieve hash+salt from Redis
 	hashedContent, err := user.Get(form.Username)
-	response.UpdateResponse(&resp, "", 0, err)
+	response.UpdateResponse(resp, "", 0, err)
 
 	// Separate the hash from the salt
 	hashedPass, salt := hash.SplitContent(hashedContent)
@@ -41,9 +40,9 @@ func Login(w http.ResponseWriter, req *http.Request) {
 	// Validate the challenge
 	if hash.IsValidChallenge(form.Password, salt, hashedPass) {
 		// Generate a session token
-		token, expTime, err := session.Create(uname)
-		response.UpdateResponse(&resp, token, expTime, err)
+		token, expTime, err := session.Create(form.Username)
+		response.UpdateResponse(resp, token, int(expTime), err)
 	} else {
-		response.UpdateResponse(&resp, "", errors.New("Incorrect Password"))
+		response.UpdateResponse(resp, "", 0, errors.New("Incorrect Password"))
 	}
 }

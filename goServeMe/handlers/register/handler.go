@@ -6,7 +6,7 @@ import (
 
 	"../../redisBus/models/user"
 	"../../util/hash"
-	"../util"
+	"./response"
 )
 
 type regInfo struct {
@@ -16,22 +16,21 @@ type regInfo struct {
 
 //Register ...
 // Add a new User to redis, given salt and hash.
-func Register(w http.ResponseWriter, req *http.Request) error {
+func Register(w http.ResponseWriter, req *http.Request) {
 	// Setup the response
-	resp, writer := util.SetupAck()
+	resp, writer := response.SetupResponse(w)
 	defer writer.Encode(resp)
-	util.ConnectionCheck()
 
 	// Parse the request, make sure it's A-OK
 	var reg regInfo
-	decoder := json.NewDecoder(r.Body)
+	decoder := json.NewDecoder(req.Body)
 	err := decoder.Decode(&reg)
-	util.UpdateAck(&resp, err)
+	response.UpdateResponse(resp, err)
 
 	// Create a hash and salt for the pass.
-	hashedPass, salt := hash.WithNewSalt(pass)
+	hashedPass, salt := hash.WithNewSalt(reg.Password)
 
 	// Create a new KVP in Redis.
-	err := user.Create(uname, hashedPass+salt)
-	util.UpdateAck(&resp, err)
+	err = user.Create(reg.Username, hashedPass+salt)
+	response.UpdateResponse(resp, err)
 }
