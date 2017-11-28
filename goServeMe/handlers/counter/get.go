@@ -1,14 +1,17 @@
-package handlers
+package counter
 
-import "net/http"
-import "../redisBus"
+import (
+	"net/http"
 
-func GetCountHandler(w http.ResponseWriter, req *http.Request) {
+	redisCounter "../../redisBus/models/counter"
+)
+
+func Get(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	if Connected {
-		msg, err := redisBus.GetCounterValue()
+		msg, err := redisCounter.Get()
 		if err != nil {
 			panic(err)
 		}

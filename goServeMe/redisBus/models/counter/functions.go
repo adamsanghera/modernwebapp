@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
-	bus ".."
+	bus "../.."
 )
 
 //IncrementCounter ...

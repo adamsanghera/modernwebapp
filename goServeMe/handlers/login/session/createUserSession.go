@@ -1,11 +1,11 @@
-package userSession
+package session
 
 import (
 	"errors"
 	"time"
 
-	bus ".."
-	login "../userlogin"
+	".."
+	bus "../../../redisBus"
 )
 
 const (

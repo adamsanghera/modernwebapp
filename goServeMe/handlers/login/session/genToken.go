@@ -1,4 +1,4 @@
-package userSession
+package session
 
 import "crypto/rand"
 

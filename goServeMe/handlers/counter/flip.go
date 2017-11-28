@@ -1,17 +1,17 @@
-package handlers
+package counter
 
 import (
 	"net/http"
 
-	"../redisBus"
+	redisCounter "../../redisBus/models/counter"
 )
 
-func DecCountHandler(w http.ResponseWriter, req *http.Request) {
+func Flip(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	if Connected {
-		msg, err := redisBus.DecrementCounter()
+		msg, err := redisCounter.Flip()
 		if err != nil {
 			panic(err)
 		}
