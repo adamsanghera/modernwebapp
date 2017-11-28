@@ -2,12 +2,14 @@ package login
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"./session"
 
 	"../../redisBus/models/user"
 	"../../util/hash"
+	"../util"
 )
 
 type requestForm struct {
@@ -15,42 +17,23 @@ type requestForm struct {
 	Password string `json:"Password"`
 }
 
-type response struct {
-	successful bool
-	errMsg     string
-}
-
-func updateResp(resp *response, err error) {
-	if err != nil {
-		resp.errMsg = err.Error()
-		resp.successful = false
-		panic(err)
-	} else {
-		resp.errMsg = ""
-		resp.successful = true
-	}
-}
-
 //Login ...
 //  INCOMPLETE!!!
 func Login(w http.ResponseWriter, req *http.Request) {
 	// Setup the response
-	resp := response{
-		successful: false,
-		errMsg:     "Unknown error",
-	}
-	writer := json.NewEncoder(w)
+	resp, writer := util.SetupResponse()
 	defer writer.Encode(resp)
+	util.ConnectionCheck()
 
 	// Parse the request, make sure it's A-OK
 	var form requestForm
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&form)
-	updateResp(&resp, err)
+	util.UpdateResponse(&resp, "", err)
 
 	// Retrieve hash+salt from Redis
 	hashedContent, err := user.Get(form.Username)
-	updateResp(&resp, err)
+	util.UpdateResponse(&resp, "", err)
 
 	// Separate the hash from the salt
 	hashedPass, salt := hash.SplitContent(hashedContent)
@@ -59,6 +42,8 @@ func Login(w http.ResponseWriter, req *http.Request) {
 	if hash.IsValidChallenge(form.Password, salt, hashedPass) {
 		// Generate a session token
 		token, err := session.Create(uname)
+		util.UpdateResponse(&resp, token, err)
+	} else {
+		util.UpdateResponse(&resp, "", errors.New("Incorrect Password"))
 	}
-
 }
