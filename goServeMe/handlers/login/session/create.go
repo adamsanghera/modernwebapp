@@ -14,20 +14,18 @@ const (
 
 //Create ...
 // Creates a session
-func Create(uname string) (string, error) {
+func Create(uname string) (string, time.Duration, error) {
 	// Make a new token!
 	token := genToken(tokenLength)
 
 	// Try to Set the key
-	result, err := bus.Client.SetNX(uname, str(token), expirationTime)
+	result, _ := bus.Client.SetNX(uname, token, expirationTime).Result()
 
 	// If unset, then the user is logged in already!
-	if result == 0 {
-		return "", errors.New("User is already logged in")
+	if result == false {
+		return "", time.Duration(0), errors.New("User is already logged in")
 	}
 
 	// If the key is set, then the user has just been logged in!
-	if result == 1 {
-		return string(token), nil
-	}
+	return token, expirationTime, nil
 }

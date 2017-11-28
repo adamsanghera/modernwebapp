@@ -9,7 +9,7 @@ import (
 
 	"../../redisBus/models/user"
 	"../../util/hash"
-	"../util"
+	"./response"
 )
 
 type requestForm struct {
@@ -21,19 +21,19 @@ type requestForm struct {
 //  INCOMPLETE!!!
 func Login(w http.ResponseWriter, req *http.Request) {
 	// Setup the response
-	resp, writer := util.SetupResponse()
+	resp, writer := response.SetupResponse()
 	defer writer.Encode(resp)
-	util.ConnectionCheck()
+	response.ConnectionCheck()
 
 	// Parse the request, make sure it's A-OK
 	var form requestForm
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&form)
-	util.UpdateResponse(&resp, "", err)
+	response.UpdateResponse(&resp, "", 0, err)
 
 	// Retrieve hash+salt from Redis
 	hashedContent, err := user.Get(form.Username)
-	util.UpdateResponse(&resp, "", err)
+	response.UpdateResponse(&resp, "", 0, err)
 
 	// Separate the hash from the salt
 	hashedPass, salt := hash.SplitContent(hashedContent)
@@ -41,9 +41,9 @@ func Login(w http.ResponseWriter, req *http.Request) {
 	// Validate the challenge
 	if hash.IsValidChallenge(form.Password, salt, hashedPass) {
 		// Generate a session token
-		token, err := session.Create(uname)
-		util.UpdateResponse(&resp, token, err)
+		token, expTime, err := session.Create(uname)
+		response.UpdateResponse(&resp, token, expTime, err)
 	} else {
-		util.UpdateResponse(&resp, "", errors.New("Incorrect Password"))
+		response.UpdateResponse(&resp, "", errors.New("Incorrect Password"))
 	}
 }
