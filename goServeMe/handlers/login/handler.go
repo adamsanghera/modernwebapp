@@ -1,7 +1,6 @@
 package login
 
 import (
-	"encoding/json"
 	"errors"
 	"net/http"
 
@@ -11,28 +10,16 @@ import (
 	"../../dbModels/user"
 )
 
-type requestForm struct {
-	Username string `json:"Username"`
-	Password string `json:"Password"`
-}
-
 var sesh = session.NewBasicSession()
 
-func handleErr(resp *response, err error) {
-	if err != nil {
-		resp.update("", 0, err)
-		panic(err)
-	}
-}
-
-func parseRequest(req *http.Request) (requestForm, error) {
-	var form requestForm
-	err := json.NewDecoder(req.Body).Decode(&form)
-	return form, err
-}
-
-//Login ...
-//  INCOMPLETE!!!
+// Login logs in the user, following these steps:
+// (1) parses a login request.
+// (2) retrieves the login info from redis.
+// (3) compares challenge with info.
+// (4) returns a json object containing:
+// (a) token if login is successful
+// (b) expiration time (in seconds!) if successful
+// (c) error message if not successful
 func Login(w http.ResponseWriter, req *http.Request) {
 	// Setup the response
 	resp, writer := newResponse(w)

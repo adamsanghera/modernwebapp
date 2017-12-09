@@ -5,6 +5,8 @@ import (
 	"net/http"
 )
 
+// This file is all about the json object sent in response
+
 type response struct {
 	Successful     bool   `json:"Successful"`
 	Token          string `json:"Token"`
