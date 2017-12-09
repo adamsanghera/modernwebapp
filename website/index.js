@@ -49,8 +49,16 @@ function updateValue(response) {
 
 function getNetworkVal() {
   $.ajax({
-    url: "http://localhost:3000/getCounter",
-    type: "get",
+    url: "http://localhost:3000/counter",
+    type: "POST",
+    data: JSON.stringify({ID: "1", Command: "get"}),
+    dataType: "json",
+    contentType: 'application/json; charset=UTF-8',
+    beforeSend: function(x) {
+      if (x && x.overrideMimeType) {
+        x.overrideMimeType("application/j-son;charset=UTF-8")
+      }
+    },
     success: (response) => {
       updateValue(response)
     },

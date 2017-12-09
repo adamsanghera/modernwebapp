@@ -1,6 +1,7 @@
 package login
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 
@@ -23,8 +24,8 @@ var sesh = session.NewBasicSession()
 // (c) error message if not successful
 func Login(w http.ResponseWriter, req *http.Request) {
 	// 0 -- setting up the response
-	resp, writer := newResponse(w)
-	defer writer.Encode(resp)
+	resp := newResponse()
+	defer json.NewEncoder(w).Encode(resp)
 
 	// 1
 	form, err := parseRequest(req)

@@ -7,61 +7,57 @@ import (
 	bus "github.com/adamsanghera/redisBus"
 )
 
-//IncrementCounter ...
-// Uses Redis' built-in incr function to increment our counter
-func Increment() (string, error) {
-	_, err := bus.Client.Incr("counter").Result()
+// Increment uses Redis' built-in incr function to increment the counter.
+func (ctr *Counter) Increment() (bool, int, error) {
+	res, err := bus.Client.Incr(ctr.ID).Result()
 	if err != nil {
-		return "", nil
+		return false, int(res), nil
 	}
-	return "Incremented!", nil
+	return false, int(res), nil
 }
 
-//GetCounterValue ...
-// Returns the value of the counter, and an error.
-func Get() (string, error) {
-	val, err := bus.Client.Get("counter").Result()
+// Get returns the value of the counter, or an int,  error if it cannot be obtained.
+func (ctr *Counter) Get() (int, error) {
+	val, err := bus.Client.Get(ctr.ID).Result()
 	if err != nil {
-		return "", err
+		return 0, err
 	}
-	fmt.Println("key", val)
-	return val, nil
+	fmt.Println(ctr.ID, val)
+	intVal, err := strconv.Atoi(val)
+	return intVal, nil
 }
 
-//DecrementCounter ...
-// Use Redis' built-in decr function to decrement our counter
-func Decrement() (string, error) {
-	_, err := bus.Client.Decr("counter").Result()
+// Decrement uses Redis' built-in decr function to decrement our counter
+func (ctr *Counter) Decrement() (bool, int, error) {
+	res, err := bus.Client.Decr(ctr.ID).Result()
 	if err != nil {
-		return "", nil
+		return false, int(res), nil
 	}
-	return "Incremented!", nil
+	return false, int(res), nil
 }
 
-//FlipCounter ...
-// Decrement by twice the counter value
-func Flip() (string, error) {
-	val, err := bus.Client.Get("counter").Result()
+// Flip decrements by twice the counter value
+func (ctr *Counter) Flip() (bool, int, error) {
+	val, err := bus.Client.Get(ctr.ID).Result()
 	if err != nil {
-		return "", err
+		return false, 0, err
 	}
 	i, err := strconv.Atoi(val)
 	if err != nil {
 		panic(err)
 	}
-	_, err = bus.Client.DecrBy("counter", int64(i*2)).Result()
+	res, err := bus.Client.DecrBy(ctr.ID, int64(i*2)).Result()
 	if err != nil {
-		return "", err
+		return false, int(res), err
 	}
-	return "Flipped!", nil
+	return false, int(res), nil
 }
 
-//ResetCounter ...
-// Sets the counter's value to 0
-func Reset() (string, error) {
+// Reset sets the counter's value to 0
+func (ctr *Counter) Reset() (bool, int, error) {
 	_, err := bus.Client.Set("counter", 0, 0).Result()
 	if err != nil {
-		return "", err
+		return false, 0, err
 	}
-	return "Reset!", nil
+	return false, 0, nil
 }

@@ -1,10 +1,5 @@
 package login
 
-import (
-	"encoding/json"
-	"net/http"
-)
-
 // This file is all about the json object sent in response
 
 type response struct {
@@ -29,14 +24,13 @@ func (r *response) update(token string, secs int, err error) {
 }
 
 // newResponse creates a new response to an http request.
-func newResponse(w http.ResponseWriter) (*response, *json.Encoder) {
+func newResponse() *response {
 	resp := response{
 		Successful:     false,
 		Token:          "",
 		ExpirationSecs: 0,
 		ErrMsg:         "Unknown error",
 	}
-	writer := json.NewEncoder(w)
 
-	return &resp, writer
+	return &resp
 }
