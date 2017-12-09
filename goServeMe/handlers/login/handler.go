@@ -10,6 +10,7 @@ import (
 	"../../dbModels/user"
 )
 
+// session used to track logged-in users
 var sesh = session.NewBasicSession()
 
 // Login logs in the user, following these steps:
