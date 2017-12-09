@@ -4,9 +4,8 @@ import (
 	bus "github.com/adamsanghera/redisBus"
 )
 
-//CreateFirstCounter ...
-// Creates the first Counter
-func CreateFirstCounter() error {
+//Create instantiates a Counter
+func Create() error {
 	err := bus.Client.Set("counter", 0, 0).Err()
 	if err != nil {
 		panic(err)
