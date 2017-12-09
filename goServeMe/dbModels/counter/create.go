@@ -1,6 +1,8 @@
 package counter
 
-import bus ".."
+import (
+	bus "github.com/adamsanghera/redisBus"
+)
 
 //CreateFirstCounter ...
 // Creates the first Counter

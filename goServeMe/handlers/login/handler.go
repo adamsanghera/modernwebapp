@@ -5,11 +5,10 @@ import (
 	"errors"
 	"net/http"
 
-	"./session"
+	"github.com/adamsanghera/hashing"
+	"github.com/adamsanghera/session"
 
-	"../../redisBus/models/user"
-	"../../util/hash"
-	"./response"
+	"../../dbModels/user"
 )
 
 type requestForm struct {
@@ -17,32 +16,48 @@ type requestForm struct {
 	Password string `json:"Password"`
 }
 
+var sesh = session.NewBasicSession()
+
+func handleErr(resp *response, err error) {
+	if err != nil {
+		resp.update("", 0, err)
+		panic(err)
+	}
+}
+
+func parseRequest(req *http.Request) (requestForm, error) {
+	var form requestForm
+	err := json.NewDecoder(req.Body).Decode(&form)
+	return form, err
+}
+
 //Login ...
 //  INCOMPLETE!!!
 func Login(w http.ResponseWriter, req *http.Request) {
 	// Setup the response
-	resp, writer := response.SetupResponse(w)
+	resp, writer := newResponse(w)
 	defer writer.Encode(resp)
 
-	// Parse the request, make sure it's A-OK
-	var form requestForm
-	decoder := json.NewDecoder(req.Body)
-	err := decoder.Decode(&form)
-	response.UpdateResponse(resp, "", 0, err)
+	// Parse the request
+	form, err := parseRequest(req)
+	handleErr(resp, err)
 
 	// Retrieve hash+salt from Redis
 	hashedContent, err := user.Get(form.Username)
-	response.UpdateResponse(resp, "", 0, err)
+	handleErr(resp, err)
 
 	// Separate the hash from the salt
-	hashedPass, salt := hash.SplitContent(hashedContent)
+	hashedPass, salt :=
+		hashedContent[:hashing.GetHashSize()],
+		hashedContent[hashing.GetHashSize():]
 
-	// Validate the challenge
-	if hash.IsValidChallenge(form.Password, salt, hashedPass) {
-		// Generate a session token
-		token, expTime, err := session.Create(form.Username)
-		response.UpdateResponse(resp, token, int(expTime), err)
+	// Validate the login attempt
+	if hashing.IsValidChallenge(form.Password, salt, hashedPass) {
+		// We good, make a session token
+		token, expTime, err := sesh.Begin(form.Username)
+		resp.update(token, int(expTime), err)
 	} else {
-		response.UpdateResponse(resp, "", 0, errors.New("Incorrect Password"))
+		// Bad password, sorry bro
+		resp.update("", 0, errors.New("Incorrect Password"))
 	}
 }

@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"strconv"
 
-	bus "../.."
+	bus "github.com/adamsanghera/redisBus"
 )
 
 //IncrementCounter ...
 // Uses Redis' built-in incr function to increment our counter
-func IncrementCounter() (string, error) {
+func Increment() (string, error) {
 	_, err := bus.Client.Incr("counter").Result()
 	if err != nil {
 		return "", nil
@@ -19,7 +19,7 @@ func IncrementCounter() (string, error) {
 
 //GetCounterValue ...
 // Returns the value of the counter, and an error.
-func GetCounterValue() (string, error) {
+func Get() (string, error) {
 	val, err := bus.Client.Get("counter").Result()
 	if err != nil {
 		return "", err
@@ -30,7 +30,7 @@ func GetCounterValue() (string, error) {
 
 //DecrementCounter ...
 // Use Redis' built-in decr function to decrement our counter
-func DecrementCounter() (string, error) {
+func Decrement() (string, error) {
 	_, err := bus.Client.Decr("counter").Result()
 	if err != nil {
 		return "", nil
@@ -40,7 +40,7 @@ func DecrementCounter() (string, error) {
 
 //FlipCounter ...
 // Decrement by twice the counter value
-func FlipCounter() (string, error) {
+func Flip() (string, error) {
 	val, err := bus.Client.Get("counter").Result()
 	if err != nil {
 		return "", err
@@ -58,7 +58,7 @@ func FlipCounter() (string, error) {
 
 //ResetCounter ...
 // Sets the counter's value to 0
-func ResetCounter() (string, error) {
+func Reset() (string, error) {
 	_, err := bus.Client.Set("counter", 0, 0).Result()
 	if err != nil {
 		return "", err

@@ -1,12 +1,11 @@
-package login
+package register
 
 import (
 	"encoding/json"
 	"net/http"
 
-	"../../redisBus/models/user"
-	"../../util/hash"
-	"./response"
+	"../../dbModels/user"
+	"github.com/adamsanghera/hashing"
 )
 
 type regInfo struct {
@@ -18,19 +17,18 @@ type regInfo struct {
 // Add a new User to redis, given salt and hash.
 func Register(w http.ResponseWriter, req *http.Request) {
 	// Setup the response
-	resp, writer := response.SetupResponse(w)
-	defer writer.Encode(resp)
+	r := newResponse()
+	defer json.NewEncoder(w).Encode(r)
 
 	// Parse the request, make sure it's A-OK
 	var reg regInfo
-	decoder := json.NewDecoder(req.Body)
-	err := decoder.Decode(&reg)
-	response.UpdateResponse(resp, err)
+	err := json.NewDecoder(req.Body).Decode(&reg)
+	r.update(err)
 
 	// Create a hash and salt for the pass.
-	hashedPass, salt := hash.WithNewSalt(reg.Password)
+	hashedPass, salt := hashing.WithNewSalt(reg.Password)
 
 	// Create a new KVP in Redis.
 	err = user.Create(reg.Username, hashedPass+salt)
-	response.UpdateResponse(resp, err)
+	r.update(err)
 }

@@ -3,7 +3,7 @@ package counter
 import (
 	"net/http"
 
-	redisCounter "../../redisBus/models/counter"
+	redisCounter "../../dbModels/counter"
 )
 
 func Get(w http.ResponseWriter, req *http.Request) {

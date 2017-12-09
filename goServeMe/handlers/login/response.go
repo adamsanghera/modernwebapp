@@ -1,4 +1,4 @@
-package response
+package login
 
 import (
 	"encoding/json"
@@ -12,7 +12,8 @@ type response struct {
 	ErrMsg         string `json:"ErrMsg"`
 }
 
-func UpdateResponse(r *response, token string, secs int, err error) {
+// updateResponse updates a response to the http request.
+func (r *response) update(token string, secs int, err error) {
 	if err != nil {
 		r.Successful = false
 		r.Token = ""
@@ -25,7 +26,8 @@ func UpdateResponse(r *response, token string, secs int, err error) {
 	r.ErrMsg = err.Error()
 }
 
-func SetupResponse(w http.ResponseWriter) (*response, *json.Encoder) {
+// newResponse creates a new response to an http request.
+func newResponse(w http.ResponseWriter) (*response, *json.Encoder) {
 	resp := response{
 		Successful:     false,
 		Token:          "",

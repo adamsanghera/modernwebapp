@@ -4,16 +4,16 @@ import (
 	"fmt"
 	"net/http"
 
-	"./handlers"
+	"./handlers/counter"
 	"./redisBus"
 )
 
 func main() {
-	http.HandleFunc("/getCounter", handlers.GetCountHandler)
-	http.HandleFunc("/incCounter", handlers.IncCountHandler)
-	http.HandleFunc("/decCounter", handlers.DecCountHandler)
-	http.HandleFunc("/flipCounter", handlers.FlipCountHandler)
-	http.HandleFunc("/resetCounter", handlers.ResetCountHandler)
+	http.HandleFunc("/getCounter", counter.Get)
+	http.HandleFunc("/incCounter", counter.Increment)
+	http.HandleFunc("/decCounter", counter.Decrement)
+	http.HandleFunc("/flipCounter", counter.Flip)
+	http.HandleFunc("/resetCounter", counter.Reset)
 
 	_, err = redisBus.GetCounterValue()
 

@@ -1,7 +1,7 @@
 package user
 
 import (
-	bus "../../"
+	bus "github.com/adamsanghera/redisBus"
 )
 
 //Get ...
