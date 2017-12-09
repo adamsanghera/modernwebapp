@@ -5,7 +5,8 @@ import (
 	"net/http"
 
 	"./handlers/counter"
-	"./redisBus"
+	"./handlers/login"
+	"./handlers/register"
 )
 
 func main() {
@@ -15,16 +16,8 @@ func main() {
 	http.HandleFunc("/flipCounter", counter.Flip)
 	http.HandleFunc("/resetCounter", counter.Reset)
 
-	_, err = redisBus.GetCounterValue()
-
-	if err != nil && err.Error() == "redis: nil" {
-		err = redisBus.CreateFirstCounter()
-		handlers.Connected = true
-	} else if err != nil {
-		panic(err)
-	} else {
-		handlers.Connected = true
-	}
+	http.HandleFunc("/login", login.Login)
+	http.HandleFunc("/register", register.Register)
 
 	fmt.Println("Listening...")
 
