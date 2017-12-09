@@ -8,27 +8,23 @@ import (
 	"github.com/adamsanghera/hashing"
 )
 
-type regInfo struct {
-	Username string `json:"Username"`
-	Password string `json:"Password"`
-}
-
-//Register ...
-// Add a new User to redis, given salt and hash.
+// Register adds a new user to redis, following these steps:
+// (1) Parses the json object received in the request.
+// (2) Tries to make a new user, following the request.
+// (3) Returns the result of this operation as an error (empty message if successful).
 func Register(w http.ResponseWriter, req *http.Request) {
 	// Setup the response
 	r := newResponse()
 	defer json.NewEncoder(w).Encode(r)
 
 	// Parse the request, make sure it's A-OK
-	var reg regInfo
-	err := json.NewDecoder(req.Body).Decode(&reg)
+	form, err := parseRequest(req)
 	r.update(err)
 
 	// Create a hash and salt for the pass.
-	hashedPass, salt := hashing.WithNewSalt(reg.Password)
+	hashedPass, salt := hashing.WithNewSalt(form.Password)
 
 	// Create a new KVP in Redis.
-	err = user.Create(reg.Username, hashedPass+salt)
+	err = user.Create(form.Username, hashedPass+salt)
 	r.update(err)
 }

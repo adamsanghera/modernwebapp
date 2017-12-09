@@ -15,6 +15,5 @@ func newResponse() *response {
 	resp := response{
 		errMsg: "Unknown error",
 	}
-
 	return &resp
 }
