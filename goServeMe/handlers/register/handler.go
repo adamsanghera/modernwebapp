@@ -13,18 +13,18 @@ import (
 // (2) Tries to make a new user, following the request.
 // (3) Returns the result of this operation as an error (empty message if successful).
 func Register(w http.ResponseWriter, req *http.Request) {
-	// Setup the response
+	// 0 – setup response
 	r := newResponse()
 	defer json.NewEncoder(w).Encode(r)
 
-	// Parse the request, make sure it's A-OK
+	// 1
 	form, err := parseRequest(req)
 	r.update(err)
 
-	// Create a hash and salt for the pass.
+	// 2
 	hashedPass, salt := hashing.WithNewSalt(form.Password)
-
-	// Create a new KVP in Redis.
 	err = user.Create(form.Username, hashedPass+salt)
+
+	// 3
 	r.update(err)
 }
