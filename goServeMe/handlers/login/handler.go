@@ -21,30 +21,28 @@ var sesh = session.NewBasicSession()
 // (b) expiration time (in seconds!) if successful
 // (c) error message if not successful
 func Login(w http.ResponseWriter, req *http.Request) {
-	// Setup the response
+	// 0 -- setting up the response
 	resp, writer := newResponse(w)
 	defer writer.Encode(resp)
 
-	// Parse the request
+	// 1
 	form, err := parseRequest(req)
 	handleErr(resp, err)
 
-	// Retrieve hash+salt from Redis
+	// 2
 	hashedContent, err := user.Get(form.Username)
 	handleErr(resp, err)
-
-	// Separate the hash from the salt
 	hashedPass, salt :=
 		hashedContent[:hashing.GetHashSize()],
 		hashedContent[hashing.GetHashSize():]
 
-	// Validate the login attempt
+	// 3
 	if hashing.IsValidChallenge(form.Password, salt, hashedPass) {
-		// We good, make a session token
+		// 4
 		token, expTime, err := sesh.Begin(form.Username)
 		resp.update(token, int(expTime), err)
 	} else {
-		// Bad password, sorry bro
+		// 4
 		resp.update("", 0, errors.New("Incorrect Password"))
 	}
 }
