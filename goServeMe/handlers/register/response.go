@@ -1,19 +1,27 @@
 package register
 
+import "errors"
+import "fmt"
+
 type response struct {
-	errMsg string
+	Successful bool  `json:"Successful"`
+	ErrMsg     error `json:"ErrMsg"`
 }
 
-func (r *response) update(err error) {
+func (r *response) update(s bool, err error) {
+	r.Successful = s
+	r.ErrMsg = err
 	if err != nil {
-		r.errMsg = err.Error()
+		fmt.Println(err)
 	}
-	r.errMsg = err.Error()
+	if err != nil && err.Error() != "That username already exists" {
+		panic(err)
+	}
 }
 
 func newResponse() *response {
 	resp := response{
-		errMsg: "Unknown error",
+		ErrMsg: errors.New("Unknown error"),
 	}
 	return &resp
 }

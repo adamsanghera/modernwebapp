@@ -12,13 +12,6 @@ type requestForm struct {
 	Password string `json:"Password"`
 }
 
-func handleErr(resp *response, err error) {
-	if err != nil {
-		resp.update("", 0, err)
-		panic(err)
-	}
-}
-
 func parseRequest(req *http.Request) (requestForm, error) {
 	var form requestForm
 	return form, json.NewDecoder(req.Body).Decode(&form)

@@ -39,8 +39,15 @@ document.addEventListener("DOMContentLoaded", function () {
   - - - - - - - - - - - - - - - - - - - - -
   */
 
+  sessionToken = ''
+  sessionExpiryTime = 0
+
+  netContainer = document.getElementById('net-container');
   netVal = document.getElementById('net-counter-value');
   netConn = document.getElementById('net-connectivity');
+  log = document.getElementById('net-log');
+
+  netContainer.style.display = 'none';
 
   function registerFailedConnection(failMessage) {
     console.log(failMessage)
@@ -61,8 +68,6 @@ document.addEventListener("DOMContentLoaded", function () {
     netVal.style = 'color: black'
     failureCounter = 0;
   }
-
-  let log = document.getElementById('net-log')
 
   function outputLog(msg) {
     const node = document.createElement("p");
@@ -86,13 +91,77 @@ document.addEventListener("DOMContentLoaded", function () {
         registerFailedConnection(com + " failed")
       }
     };
+    xhr.onerror = function () {
+      registerFailedConnection("can't connect")
+    }
+  }
+
+  function autoRenewToken() {
+    setInterval(() => {
+
+    }, sessionExpiryTime / 2)
+  }
+
+  function login(username, password) {
+    console.log("making login request for " + username)
+    var xhr = new XMLHttpRequest({mozSystem: true});
+    xhr.open("POST", "http://localhost:3000/login");
+    xhr.send(JSON.stringify({
+      Username: username, 
+      Password: password
+    }));
+    xhr.onload = function () {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        obj = JSON.parse(xhr.responseText) 
+        if (obj['Successful'] == true) {
+          $('#register').hide()
+          $('#login').hide()
+          document.getElementById('username-display').textContent = username
+          sessionToken = obj['Token']
+          sessionExpiryTime = obj['ExpirationSecs']
+        } else {
+          console.log(obj['ErrMsg'])
+        }
+      } else {
+        registerFailedConnection(com + " failed")
+      }
+    };
+    xhr.onerror = function () {
+      registerFailedConnection("can't connect")
+    }
+  }
+
+  function register(username, password) {
+    console.log("making register request for " + username)
+    var xhr = new XMLHttpRequest({mozSystem: true});
+    xhr.open("POST", "http://localhost:3000/register");
+    xhr.send(JSON.stringify({
+      Username: username, 
+      Password: password
+    }));
+    xhr.onload = function () {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        if (JSON.parse(xhr.responseText)['Successful'] == true) {
+          $('#register').children().hide()
+          const node = document.createElement("p");
+          node.textContent = "Registered " + username
+          document.getElementById('register').appendChild(node)
+        } else {
+          console.log(xhr.responseText)
+        }
+      } else {
+        registerFailedConnection(com + " failed")
+      }
+    };
+    xhr.onerror = function () {
+      registerFailedConnection("can't connect")
+    }
   }
 
   document.getElementById('net-inc').addEventListener("click", () => {
     messageServer('inc')
     outputLog('Incremented!')
   })
-
 
   document.getElementById('net-dec').addEventListener("click", () => {
     messageServer('dec')
@@ -109,21 +178,34 @@ document.addEventListener("DOMContentLoaded", function () {
     outputLog('Reset!')
   })
 
+  document.getElementById('login-but').addEventListener("click", () => {
+    login(document.getElementById('log-user').value,document.getElementById('log-pass').value)
+  })
+
+  document.getElementById('register-but').addEventListener("click", () => {
+    register(document.getElementById('reg-user').value,document.getElementById('reg-pass').value)
+  })
+
   window.setInterval(() => {
-    var xhr = new XMLHttpRequest({mozSystem: true});
-    xhr.open("POST", "http://localhost:3000/counter");
-    // xhr.setRequestHeader("Content-Type", "application/json");
-    xhr.send(JSON.stringify({
-      ID: "1", 
-      Command: "get"
-    }));
-    xhr.onload = function () {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        // console.log(JSON.parse(xhr.responseText))
-        updateValue(JSON.parse(xhr.responseText)['Value'])
-      } else {
-        registerFailedConnection("ping failed")
+    if (netContainer.style.display != 'none') {
+      var xhr = new XMLHttpRequest({mozSystem: true});
+      xhr.open("POST", "http://localhost:3000/counter");
+      // xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.send(JSON.stringify({
+        ID: "1", 
+        Command: "get"
+      }));
+      xhr.onload = function () {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          // console.log(JSON.parse(xhr.responseText))
+          updateValue(JSON.parse(xhr.responseText)['Value'])
+        } else {
+          registerFailedConnection("ping failed")
+        }
+      };
+      xhr.onerror = function () {
+        registerFailedConnection("can't connect")
       }
-    };
+    }
   }, 500)
 })

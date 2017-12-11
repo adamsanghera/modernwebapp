@@ -3,6 +3,7 @@ package login
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/adamsanghera/hashing"
@@ -25,15 +26,32 @@ var sesh = session.NewBasicSession()
 func Login(w http.ResponseWriter, req *http.Request) {
 	// 0 -- setting up the response
 	resp := newResponse()
+
+	if acrh, ok := req.Header["Access-Control-Request-Headers"]; ok {
+		w.Header().Set("Access-Control-Allow-Headers", acrh[0])
+	}
+	w.Header().Set("Access-Control-Allow-Credentials", "True")
+	if acao, ok := req.Header["Access-Control-Allow-Origin"]; ok {
+		w.Header().Set("Access-Control-Allow-Origin", acao[0])
+	} else {
+		if _, oko := req.Header["Origin"]; oko {
+			w.Header().Set("Access-Control-Allow-Origin", req.Header["Origin"][0])
+		} else {
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+		}
+	}
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
+	w.Header().Set("Connection", "Close")
+
 	defer json.NewEncoder(w).Encode(resp)
 
 	// 1
 	form, err := parseRequest(req)
-	handleErr(resp, err)
+	resp.update(false, "", 0, err)
 
 	// 2
 	hashedContent, err := user.Get(form.Username)
-	handleErr(resp, err)
+	resp.update(false, "", 0, err)
 	hashedPass, salt :=
 		hashedContent[:hashing.GetHashSize()],
 		hashedContent[hashing.GetHashSize():]
@@ -42,9 +60,10 @@ func Login(w http.ResponseWriter, req *http.Request) {
 	if hashing.IsValidChallenge(form.Password, salt, hashedPass) {
 		// 4
 		token, expTime, err := sesh.Begin(form.Username)
-		resp.update(token, int(expTime), err)
+		resp.update(err == nil, token, int(expTime), err)
 	} else {
 		// 4
-		resp.update("", 0, errors.New("Incorrect Password"))
+		fmt.Println("bad password for " + form.Username)
+		resp.update(false, "", 0, errors.New("Incorrect Password"))
 	}
 }

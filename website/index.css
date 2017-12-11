@@ -67,6 +67,29 @@ h1 {
   border: 2px solid paleturquoise;
 }
 
+#login.words-container {
+  display: inline-block; 
+  vertical-align: top;
+  width: fit-content;
+  border: black 2px dotted;
+  padding: 0.5em;
+}
+
+#register.words-container {
+  display: inline-block; 
+  vertical-align: top;
+  width: fit-content;
+  border: black 2px dotted;
+  padding: 0.5em;
+}
+
+#identifier.words-container {
+  display: inline-block; 
+  vertical-align: top;
+  width: fit-content;
+  height: auto;
+}
+
 #net.control-box {
   display: inline-block;
   vertical-align: top;
