@@ -18,10 +18,10 @@ func (r *response) update(successful bool, err error, val int) {
 }
 
 func newResponse() *response {
-	resp := response{
+	resp := &response{
 		Successful: false,
-		ErrMsg:     errors.New("Unknown error"),
 		Value:      0,
+		ErrMsg:     errors.New("Unknown error"),
 	}
-	return &resp
+	return resp
 }

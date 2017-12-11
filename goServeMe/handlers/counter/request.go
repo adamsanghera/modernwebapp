@@ -2,8 +2,7 @@ package counter
 
 import (
 	"encoding/json"
-	//"fmt"
-	"net/http"
+	"io"
 )
 
 type requestForm struct {
@@ -11,9 +10,9 @@ type requestForm struct {
 	Command string `json:"Command"`
 }
 
-func parseRequest(req *http.Request) (*requestForm, error) {
+func parseRequest(rawData io.ReadCloser) (requestForm, error) {
 	var form requestForm
-	dec := json.NewDecoder(req.Body)
-	err := dec.Decode(&form)
-	return &form, err
+	err := json.NewDecoder(rawData).Decode(&form)
+	rawData.Close()
+	return form, err
 }
