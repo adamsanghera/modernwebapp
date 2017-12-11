@@ -1,10 +1,14 @@
 document.addEventListener("DOMContentLoaded", function () {
 
+  /*
+  - - - - - - - - - - - - - - - - - - - - -
+  - - - - - Here be local counters - - - - 
+  - - - - - - - - - - - - - - - - - - - - -
+  */
+
   let localCtr = 0;
   let localVal = document.getElementById('local-counter-value');
   localVal.textContent = localCtr;
-  netVal = document.getElementById('net-counter-value');
-  netConn = document.getElementById('net-connectivity');
 
   document.getElementById('local-inc').addEventListener("click", () => {
     localCtr = localCtr + 1;
@@ -29,6 +33,15 @@ document.addEventListener("DOMContentLoaded", function () {
   let failureCounter = 0;
   let successCounter = 0;
 
+  /*
+  - - - - - - - - - - - - - - - - - - - - -
+  - - - - - Here be network counters - - - 
+  - - - - - - - - - - - - - - - - - - - - -
+  */
+
+  netVal = document.getElementById('net-counter-value');
+  netConn = document.getElementById('net-connectivity');
+
   function registerFailedConnection(failMessage) {
     console.log(failMessage)
     failureCounter += 1;
@@ -43,23 +56,10 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log("received a response: " + response)
     successCounter += 1;
     netVal.textContent = response;
-    netConn.textContent = "Consecutive successful pings: " + successCounter;
+    netConn.textContent = "Consecutive successful messages: " + successCounter;
     netConn.style = 'color: green'
     netVal.style = 'color: black'
     failureCounter = 0;
-  }
-
-  function sendNetSignal(signal) {
-    $.ajax( {
-      url:"http://localhost:3000/"+signal,
-      type: "post",
-      success: function(response) {
-        console.log("received a response: " + response)
-      },
-      error: (xhr) => {
-        registerFailedConnection(xhr)
-      }
-    });
   }
 
   let log = document.getElementById('net-log')
@@ -72,41 +72,58 @@ document.addEventListener("DOMContentLoaded", function () {
     log.scrollTo(0,0);
   }
 
+  function messageServer(com) {
+    var xhr = new XMLHttpRequest({mozSystem: true});
+    xhr.open("POST", "http://localhost:3000/counter");
+    xhr.send(JSON.stringify({
+      ID: "1", 
+      Command: com
+    }));
+    xhr.onload = function () {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        updateValue(JSON.parse(xhr.responseText)['Value'])
+      } else {
+        registerFailedConnection(com + " failed")
+      }
+    };
+  }
+
   document.getElementById('net-inc').addEventListener("click", () => {
-    sendNetSignal("incCounter")
+    messageServer('inc')
     outputLog('Incremented!')
   })
 
+
   document.getElementById('net-dec').addEventListener("click", () => {
-    sendNetSignal("decCounter")
+    messageServer('dec')
     outputLog('Decremented!')
   })
 
   document.getElementById('net-flip').addEventListener("click", () => {
-    sendNetSignal("flipCounter")
+    messageServer('flip')
     outputLog('Flipped!')
   })
 
   document.getElementById('net-reset').addEventListener("click", () => {
-    sendNetSignal("resetCounter")
+    messageServer('reset')
     outputLog('Reset!')
   })
 
-  window.setInterval((e) => {
-    data = JSON.stringify({
-      ID: "1", 
-      Command: "get"
-    });
+  window.setInterval(() => {
     var xhr = new XMLHttpRequest({mozSystem: true});
     xhr.open("POST", "http://localhost:3000/counter");
-    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-    xhr.send(data);
-    // xhr.onreadystatechange = function () {
-    //   if (xhr.status >= 200 && xhr.status < 300) {
-    //     console.log(xhr.responseText);
-    //   } else {
-    //     console.warn(xhr);
-    //   }
-    // };
+    // xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.send(JSON.stringify({
+      ID: "1", 
+      Command: "get"
+    }));
+    xhr.onload = function () {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        // console.log(JSON.parse(xhr.responseText))
+        updateValue(JSON.parse(xhr.responseText)['Value'])
+      } else {
+        registerFailedConnection("ping failed")
+      }
+    };
   }, 500)
 })
