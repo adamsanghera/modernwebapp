@@ -1,7 +1,8 @@
 package login
 
-import "errors"
-import "fmt"
+import (
+	"fmt"
+)
 
 // This file is all about the json object sent in response
 
@@ -9,7 +10,7 @@ type response struct {
 	Successful     bool   `json:"Successful"`
 	Token          string `json:"Token"`
 	ExpirationSecs int    `json:"ExpirationSecs"`
-	ErrMsg         error  `json:"ErrMsg"`
+	Err            Error  `json:"ErrMsg"`
 }
 
 // updateResponse updates a response to the http request.
@@ -17,7 +18,7 @@ func (r *response) update(s bool, token string, secs int, err error) {
 	r.Successful = s
 	r.Token = token
 	r.ExpirationSecs = secs
-	r.ErrMsg = err
+	r.Err.update(err)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -27,12 +28,12 @@ func (r *response) update(s bool, token string, secs int, err error) {
 }
 
 // newResponse creates a new response to an http request.
-func newResponse() *response {
+func newDefaultResponse() *response {
 	resp := response{
 		Successful:     false,
 		Token:          "",
 		ExpirationSecs: 0,
-		ErrMsg:         errors.New("Unknown error"),
+		Err:            newError(),
 	}
 
 	return &resp
