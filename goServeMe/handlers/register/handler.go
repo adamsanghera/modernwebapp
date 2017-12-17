@@ -43,5 +43,5 @@ func Register(w http.ResponseWriter, req *http.Request) {
 	err = user.Create(form.Username, hashedPass+salt)
 
 	// 3
-	r.update(err != nil, err)
+	r.update(err == nil, err)
 }

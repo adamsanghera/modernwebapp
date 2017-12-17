@@ -3,7 +3,6 @@ package login
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/adamsanghera/hashing"
@@ -45,14 +44,18 @@ func addDefaultHeaders(w http.ResponseWriter, req *http.Request) http.ResponseWr
 func Handler(w http.ResponseWriter, req *http.Request) {
 	// 0 -- setting up the response
 	resp := newDefaultResponse()
+	logger.write(newLogMessage("Received login request", "TBD", resp.Err))
 	w = addDefaultHeaders(w, req) // Is it necessary to re-set w, since we can't pass w as a poitner? I'm assuming it is, but I'm not sure
 	defer json.NewEncoder(w).Encode(resp)
 
 	// 1
+	logger.write(newLogMessage("Parsing login request", "TBD", resp.Err))
 	form, err := parseRequest(req)
 	resp.update(false, "", 0, err)
+	resp.Err.ingestRequest(form)
 
 	// 2
+	logger.write(newLogMessage("Retrieving login info from Redis", form.Operation, resp.Err))
 	hashedContent, err := user.Get(form.Username)
 	resp.update(false, "", 0, err)
 	hashedPass, salt :=
@@ -60,13 +63,15 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 		hashedContent[hashing.GetHashSize():]
 
 	// 3
+	logger.write(newLogMessage("Validating token", form.Operation, resp.Err))
 	if hashing.IsValidChallenge(form.Password, salt, hashedPass) {
 		// 4
+		logger.write(newLogMessage("Token validated, beginning session", form.Operation, resp.Err))
 		token, expTime, err := sesh.Begin(form.Username)
 		resp.update(err == nil, token, int(expTime), err)
 	} else {
 		// 4
-		fmt.Println("Bad password for " + form.Username)
+		logger.write(newLogMessage("Token provided was not valid", form.Operation, resp.Err))
 		resp.update(false, "", 0, errors.New("Incorrect Password"))
 	}
 }

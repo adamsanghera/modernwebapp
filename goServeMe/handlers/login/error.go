@@ -17,6 +17,10 @@ func (e *Error) update(er error) {
 	e.Err = er
 }
 
+func (e *Error) ingestRequest(r requestForm) {
+	e.Request = r
+}
+
 func newError() Error {
 	return Error{
 		Request: requestForm{},
