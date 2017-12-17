@@ -6,13 +6,9 @@ import (
 	"net/http"
 
 	"github.com/adamsanghera/hashing"
-	"github.com/adamsanghera/session"
 
 	"../../dbModels/user"
 )
-
-// session used to track logged-in users
-var sesh = session.NewBasicSession()
 
 func addDefaultHeaders(w http.ResponseWriter, req *http.Request) http.ResponseWriter {
 	if acrh, ok := req.Header["Access-Control-Request-Headers"]; ok {
@@ -42,20 +38,20 @@ func addDefaultHeaders(w http.ResponseWriter, req *http.Request) http.ResponseWr
 // (b) expiration time (in seconds!) if successful
 // (c) error message if not successful
 func Handler(w http.ResponseWriter, req *http.Request) {
-	// 0 -- setting up the response
+	// 0 -- Set up our response.
 	resp := newDefaultResponse()
-	logger.write(newLogMessage("Received login request", "TBD", resp.Err))
-	w = addDefaultHeaders(w, req) // Is it necessary to re-set w, since we can't pass w as a poitner? I'm assuming it is, but I'm not sure
+	logger.writeDebug(newLogMessage("Received login request", "TBD", resp.RequestInfo))
+	w = addDefaultHeaders(w, req)
 	defer json.NewEncoder(w).Encode(resp)
 
 	// 1
-	logger.write(newLogMessage("Parsing login request", "TBD", resp.Err))
+	logger.writeDebug(newLogMessage("Parsing login request", "TBD", resp.RequestInfo))
 	form, err := parseRequest(req)
 	resp.update(false, "", 0, err)
-	resp.Err.ingestRequest(form)
+	resp.RequestInfo.ingestRequest(form)
 
 	// 2
-	logger.write(newLogMessage("Retrieving login info from Redis", form.Operation, resp.Err))
+	logger.writeDebug(newLogMessage("Retrieving login info from Redis", form.Operation, resp.RequestInfo))
 	hashedContent, err := user.Get(form.Username)
 	resp.update(false, "", 0, err)
 	hashedPass, salt :=
@@ -63,15 +59,15 @@ func Handler(w http.ResponseWriter, req *http.Request) {
 		hashedContent[hashing.GetHashSize():]
 
 	// 3
-	logger.write(newLogMessage("Validating token", form.Operation, resp.Err))
+	logger.writeDebug(newLogMessage("Validating token", form.Operation, resp.RequestInfo))
 	if hashing.IsValidChallenge(form.Password, salt, hashedPass) {
 		// 4
-		logger.write(newLogMessage("Token validated, beginning session", form.Operation, resp.Err))
+		logger.writeDebug(newLogMessage("Token validated, beginning session", form.Operation, resp.RequestInfo))
 		token, expTime, err := sesh.Begin(form.Username)
-		resp.update(err == nil, token, int(expTime), err)
+		resp.update(err == nil, token, int(expTime.Seconds()), err)
 	} else {
 		// 4
-		logger.write(newLogMessage("Token provided was not valid", form.Operation, resp.Err))
+		logger.writeDebug(newLogMessage("Token provided was not valid", form.Operation, resp.RequestInfo))
 		resp.update(false, "", 0, errors.New("Incorrect Password"))
 	}
 }

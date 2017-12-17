@@ -2,20 +2,14 @@ package register
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"../../dbModels/user"
 	"github.com/adamsanghera/hashing"
 )
 
-// Register adds a new user to redis, following these steps:
-// (1) Parses the json object received in the request.
-// (2) Tries to make a new user, following the request.
-// (3) Returns the result of this operation as an error (empty message if successful).
-func Register(w http.ResponseWriter, req *http.Request) {
-	// 0 – setup response
-	r := newResponse()
-
+func addDefaultHeaders(w http.ResponseWriter, req *http.Request) http.ResponseWriter {
 	if acrh, ok := req.Header["Access-Control-Request-Headers"]; ok {
 		w.Header().Set("Access-Control-Allow-Headers", acrh[0])
 	}
@@ -31,7 +25,17 @@ func Register(w http.ResponseWriter, req *http.Request) {
 	}
 	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
 	w.Header().Set("Connection", "Close")
+	return w
+}
 
+// Register adds a new user to redis, following these steps:
+// (1) Parses the json object received in the request.
+// (2) Tries to make a new user, following the request.
+// (3) Returns the result of this operation as an error (empty message if successful).
+func Register(w http.ResponseWriter, req *http.Request) {
+	// 0 – setup response
+	w = addDefaultHeaders(w, req)
+	r := newResponse()
 	defer json.NewEncoder(w).Encode(r)
 
 	// 1
@@ -39,8 +43,9 @@ func Register(w http.ResponseWriter, req *http.Request) {
 	r.update(false, err)
 
 	// 2
-	hashedPass, salt := hashing.WithNewSalt(form.Password)
-	err = user.Create(form.Username, hashedPass+salt)
+	salt, hash := hashing.WithNewSalt(form.Password)
+	fmt.Println("Registering " + form.Username + " with hash " + hash + " and salt " + salt)
+	err = user.Create(form.Username, hash+salt)
 
 	// 3
 	r.update(err == nil, err)

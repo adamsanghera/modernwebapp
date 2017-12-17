@@ -9,16 +9,16 @@ import (
 // It is expected that this message will be printed in JSON format to stdout, and that
 // this printed object will be interpreted and wrapped by a logging utility service, like logspout.
 type logMessage struct {
-	State     string `json:"State"`
-	Operation string `json:"Operation"`
-	Err       Error  `json:"Err"`
+	State       string `json:"State"`
+	Operation   string `json:"Operation"`
+	RequestInfo Error  `json:"RequestInfo"`
 }
 
 func newLogMessage(state string, operation string, err Error) logMessage {
 	return logMessage{
-		State:     state,
-		Operation: operation,
-		Err:       err,
+		State:       state,
+		Operation:   operation,
+		RequestInfo: err,
 	}
 }
 
@@ -33,6 +33,12 @@ func newStdoutJSONLogger() *jsonLogger {
 	}
 }
 
-func (ml *jsonLogger) write(lm logMessage) {
+func (ml *jsonLogger) writeDebug(lm logMessage) {
+	if debugMode {
+		ml.Writer.Encode(lm)
+	}
+}
+
+func (ml *jsonLogger) writeCritical(lm logMessage) {
 	ml.Writer.Encode(lm)
 }
